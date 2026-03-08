@@ -1,0 +1,12 @@
+{
+    "version": 2,
+    "public": true,
+    "name": "2careai-frontend",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/frontend/index.html"
+        }
+    ],
+    "cleanUrls": true
+}

@@ -1,0 +1,29 @@
+graph TD
+    User((Patient/User)) -- "Voice WebSocket" --> WS[WebSocket Handler<br/>ws_handler.py]
+
+    subgraph "Real-Time Pipeline · target &lt; 450ms"
+        WS -- "Audio bytes" --> STT["Speech-to-Text<br/>Deepgram Nova-2 · ~120ms<br/>+ detected_language"]
+        STT -- "Text + lang" --> LD["Language Detection<br/>STT primary · Unicode fallback<br/>EN / HI / TA"]
+        LD -- "Query + lang" --> Agent["AI Agent<br/>Llama 3.3 70B via Groq · ~200ms<br/>Tool calling · Multi-turn"]
+        Agent -- "Tool call" --> Tools["Tool Orchestration<br/>tool_executor.py<br/>checkAvailability · bookAppointment<br/>cancel · reschedule · listDoctors"]
+        Tools -- "DB query" --> Sched["Appointment Engine<br/>appointment_engine.py<br/>Conflict detection · Alternatives"]
+        Sched -- "Result" --> Agent
+        Agent -- "Text response" --> TTS["Text-to-Speech · ~100ms<br/>gTTS primary: HI/TA<br/>ElevenLabs primary: EN"]
+        TTS -- "MP3 audio bytes" --> WS
+    end
+
+    subgraph "Memory Layer"
+        Agent -- "R/W session" --> Redis[(Session Memory<br/>Redis 7 · TTL 30min<br/>20-turn history)]
+        Agent -- "R/W history" --> PG[(Persistent Memory<br/>PostgreSQL 16<br/>Patient prefs · Past appts)]
+        Redis --> CTX[Context Builder<br/>context_builder.py]
+        PG --> CTX
+        CTX -- "Injected into LLM prompt" --> Agent
+    end
+
+    subgraph "Outbound Campaign Scheduler"
+        OutSched["APScheduler<br/>3 daily jobs<br/>8AM reminders · 10AM follow-ups<br/>6PM no-show detection"] -- "Trigger call" --> Dialer["Twilio Dialer<br/>dialer.py"]
+        Dialer -- "TwiML bridge" --> WS
+    end
+
+    WS -- "JSON metadata + audio" --> FE["Frontend UI<br/>index.html · WebRTC<br/>Latency display · Transcript"]
+    FE -- "Display" --> User

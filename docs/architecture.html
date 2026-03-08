@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>2Care.ai — System Architecture Diagram</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; padding: 40px; }
+  h1 { font-size: 22px; font-weight: 700; color: #0e1117; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 36px; }
+  .diagram-wrap { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 40px; max-width: 1100px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,.07); }
+  svg { width: 100%; height: auto; }
+
+  /* colors */
+  .box-dark   { fill: #0e1117; stroke: #333; }
+  .box-green  { fill: #d4f0e8; stroke: #0a7c5c; }
+  .box-blue   { fill: #dde8fc; stroke: #1a4fa0; }
+  .box-amber  { fill: #fdf0dc; stroke: #b8671a; }
+  .box-red    { fill: #fde8e6; stroke: #c0392b; }
+  .box-purple { fill: #ede8fc; stroke: #6c3fb5; }
+  .box-gray   { fill: #f0f0f0; stroke: #aaa; }
+  .box-teal   { fill: #d4f5f0; stroke: #0e8a7a; }
+
+  text { font-family: 'Segoe UI', sans-serif; font-size: 12px; fill: #1c1c2e; }
+  .label-sm { font-size: 10px; fill: #666; }
+  .label-hd { font-size: 11px; font-weight: 700; fill: #0e1117; }
+  .arrow     { fill: none; stroke: #888; stroke-width: 1.5; marker-end: url(#arr); }
+  .arrow-hi  { fill: none; stroke: #0a7c5c; stroke-width: 2; marker-end: url(#arr-g); }
+  .section-bg { fill: #fafafa; stroke: #ddd; stroke-dasharray: 5,3; rx: 8; }
+  .section-lbl { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; fill: #999; }
+</style>
+</head>
+<body>
+<div class="diagram-wrap">
+  <h1>2Care.ai — Real-Time Multilingual Voice AI Agent</h1>
+  <p class="subtitle">System Architecture · Clinical Appointment Booking · EN / HI / TA</p>
+
+  <svg viewBox="0 0 1020 680" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr"   markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#888"/></marker>
+      <marker id="arr-g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0a7c5c"/></marker>
+    </defs>
+
+    <!-- ── Section backgrounds ─────────────────────────── -->
+    <!-- Real-Time Pipeline -->
+    <rect x="160" y="60" width="660" height="260" rx="8" class="section-bg"/>
+    <text x="178" y="80" class="section-lbl">Real-Time Voice Pipeline (target &lt; 450ms)</text>
+
+    <!-- Memory Layer -->
+    <rect x="160" y="360" width="340" height="130" rx="8" class="section-bg"/>
+    <text x="178" y="380" class="section-lbl">Memory Layer</text>
+
+    <!-- External / Outbound -->
+    <rect x="540" y="360" width="280" height="130" rx="8" class="section-bg"/>
+    <text x="558" y="380" class="section-lbl">Outbound Campaigns</text>
+
+    <!-- Infrastructure -->
+    <rect x="160" y="528" width="660" height="90" rx="8" class="section-bg"/>
+    <text x="178" y="548" class="section-lbl">Infrastructure</text>
+
+    <!-- ── User ──────────────────────────────────────── -->
+    <ellipse cx="70" cy="190" rx="48" ry="48" fill="#0e1117" stroke="#333"/>
+    <text x="70" y="186" text-anchor="middle" fill="white" font-size="11" font-weight="700">PATIENT</text>
+    <text x="70" y="200" text-anchor="middle" fill="#34d399" font-size="10">Voice / Phone</text>
+
+    <!-- ── Browser Frontend ─────────────────────────── -->
+    <rect x="840" y="100" width="150" height="70" rx="5" class="box-gray"/>
+    <text x="915" y="130" text-anchor="middle" class="label-hd">Browser UI</text>
+    <text x="915" y="146" text-anchor="middle" class="label-sm">index.html</text>
+    <text x="915" y="160" text-anchor="middle" class="label-sm">WebRTC · Mic · Playback</text>
+
+    <!-- ── WebSocket Handler ─────────────────────────── -->
+    <rect x="175" y="95" width="160" height="70" rx="5" class="box-dark"/>
+    <text x="255" y="125" text-anchor="middle" fill="white" font-size="12" font-weight="700">WebSocket</text>
+    <text x="255" y="141" text-anchor="middle" fill="#34d399" font-size="10">ws_handler.py</text>
+    <text x="255" y="157" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="9">FastAPI · Binary Audio</text>
+
+    <!-- ── STT ───────────────────────────────────────── -->
+    <rect x="365" y="95" width="160" height="70" rx="5" class="box-green"/>
+    <text x="445" y="122" text-anchor="middle" class="label-hd">Speech-to-Text</text>
+    <text x="445" y="138" text-anchor="middle" class="label-sm">Deepgram Nova-2</text>
+    <text x="445" y="152" text-anchor="middle" class="label-sm">+ Language Detect · ~120ms</text>
+    <text x="445" y="163" text-anchor="middle" fill="#0a7c5c" font-size="9">Whisper fallback</text>
+
+    <!-- ── LLM Agent ─────────────────────────────────── -->
+    <rect x="365" y="205" width="160" height="80" rx="5" class="box-blue"/>
+    <text x="445" y="232" text-anchor="middle" class="label-hd">AI Agent</text>
+    <text x="445" y="248" text-anchor="middle" class="label-sm">Llama 3.3 70B (Groq)</text>
+    <text x="445" y="264" text-anchor="middle" class="label-sm">Tool Calling · ~200ms</text>
+    <text x="445" y="278" text-anchor="middle" fill="#1a4fa0" font-size="9">prompts.py · llm_agent.py</text>
+
+    <!-- ── Tool Orchestration ────────────────────────── -->
+    <rect x="555" y="205" width="155" height="80" rx="5" class="box-purple"/>
+    <text x="633" y="232" text-anchor="middle" class="label-hd">Tool Orchestration</text>
+    <text x="633" y="248" text-anchor="middle" class="label-sm">checkAvailability</text>
+    <text x="633" y="262" text-anchor="middle" class="label-sm">bookAppointment</text>
+    <text x="633" y="276" text-anchor="middle" class="label-sm">cancel / reschedule</text>
+
+    <!-- ── Appointment Engine ────────────────────────── -->
+    <rect x="555" y="95" width="155" height="80" rx="5" class="box-teal"/>
+    <text x="633" y="122" text-anchor="middle" class="label-hd">Appointment Engine</text>
+    <text x="633" y="138" text-anchor="middle" class="label-sm">Conflict Detection</text>
+    <text x="633" y="152" text-anchor="middle" class="label-sm">Availability Check</text>
+    <text x="633" y="166" text-anchor="middle" class="label-sm">PostgreSQL (async)</text>
+
+    <!-- ── TTS ───────────────────────────────────────── -->
+    <rect x="175" y="205" width="160" height="80" rx="5" class="box-amber"/>
+    <text x="255" y="232" text-anchor="middle" class="label-hd">Text-to-Speech</text>
+    <text x="255" y="248" text-anchor="middle" class="label-sm">ElevenLabs (EN)</text>
+    <text x="255" y="262" text-anchor="middle" class="label-sm">gTTS — HI / TA</text>
+    <text x="255" y="278" text-anchor="middle" class="label-sm">~100ms</text>
+
+    <!-- ── Memory ────────────────────────────────────── -->
+    <!-- Redis -->
+    <rect x="175" y="390" width="140" height="80" rx="5" class="box-red"/>
+    <text x="245" y="415" text-anchor="middle" class="label-hd">Session Memory</text>
+    <text x="245" y="431" text-anchor="middle" class="label-sm">Redis 7</text>
+    <text x="245" y="447" text-anchor="middle" class="label-sm">TTL: 30 min</text>
+    <text x="245" y="462" text-anchor="middle" fill="#c0392b" font-size="9">20-turn conv history</text>
+
+    <!-- PostgreSQL persistent -->
+    <rect x="345" y="390" width="140" height="80" rx="5" class="box-green"/>
+    <text x="415" y="415" text-anchor="middle" class="label-hd">Persistent Memory</text>
+    <text x="415" y="431" text-anchor="middle" class="label-sm">PostgreSQL 16</text>
+    <text x="415" y="447" text-anchor="middle" class="label-sm">Patient history</text>
+    <text x="415" y="462" text-anchor="middle" fill="#0a7c5c" font-size="9">Preferences · Past appts</text>
+
+    <!-- ── Outbound Campaigns ────────────────────────── -->
+    <rect x="555" y="390" width="135" height="80" rx="5" class="box-blue"/>
+    <text x="623" y="415" text-anchor="middle" class="label-hd">Campaign Scheduler</text>
+    <text x="623" y="431" text-anchor="middle" class="label-sm">APScheduler</text>
+    <text x="623" y="447" text-anchor="middle" class="label-sm">8AM Reminders</text>
+    <text x="623" y="462" text-anchor="middle" class="label-sm">10AM Follow-ups</text>
+
+    <rect x="715" y="390" width="100" height="80" rx="5" class="box-dark"/>
+    <text x="765" y="415" text-anchor="middle" fill="white" font-size="11" font-weight="700">Twilio</text>
+    <text x="765" y="431" text-anchor="middle" fill="#34d399" font-size="10">Dialer</text>
+    <text x="765" y="447" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9">Outbound calls</text>
+    <text x="765" y="462" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9">TwiML bridge</text>
+
+    <!-- ── Infrastructure ────────────────────────────── -->
+    <rect x="175" y="558" width="100" height="45" rx="4" class="box-blue"/>
+    <text x="225" y="578" text-anchor="middle" class="label-hd">Docker</text>
+    <text x="225" y="593" text-anchor="middle" class="label-sm">Compose · 4 services</text>
+
+    <rect x="295" y="558" width="100" height="45" rx="4" class="box-gray"/>
+    <text x="345" y="578" text-anchor="middle" class="label-hd">Prometheus</text>
+    <text x="345" y="593" text-anchor="middle" class="label-sm">Metrics · 7d retention</text>
+
+    <rect x="415" y="558" width="100" height="45" rx="4" class="box-green"/>
+    <text x="465" y="578" text-anchor="middle" class="label-hd">JWT Auth</text>
+    <text x="465" y="593" text-anchor="middle" class="label-sm">Rate limiting · CORS</text>
+
+    <rect x="535" y="558" width="110" height="45" rx="4" class="box-amber"/>
+    <text x="590" y="578" text-anchor="middle" class="label-hd">Alembic</text>
+    <text x="590" y="593" text-anchor="middle" class="label-sm">DB Migrations</text>
+
+    <rect x="665" y="558" width="145" height="45" rx="4" class="box-purple"/>
+    <text x="738" y="578" text-anchor="middle" class="label-hd">Next.js Admin</text>
+    <text x="738" y="593" text-anchor="middle" class="label-sm">TypeScript · React UI</text>
+
+    <!-- ── Arrows ─────────────────────────────────────── -->
+    <!-- User ↔ WS -->
+    <line x1="118" y1="175" x2="172" y2="148" class="arrow-hi"/>
+    <text x="130" y="165" class="label-sm" fill="#0a7c5c">Voice</text>
+    <line x1="172" y1="258" x2="118" y2="210" class="arrow-hi"/>
+    <text x="118" y="248" class="label-sm" fill="#0a7c5c">Audio</text>
+
+    <!-- WS → STT -->
+    <line x1="335" y1="130" x2="362" y2="130" class="arrow"/>
+    <text x="346" y="125" class="label-sm">Audio bytes</text>
+
+    <!-- STT → LLM Agent -->
+    <line x1="445" y1="165" x2="445" y2="202" class="arrow"/>
+    <text x="450" y="188" class="label-sm">Text + lang</text>
+
+    <!-- LLM → Tools -->
+    <line x1="525" y1="245" x2="552" y2="245" class="arrow"/>
+    <text x="531" y="240" class="label-sm">Tool call</text>
+
+    <!-- Tools → Appointment Engine -->
+    <line x1="633" y1="205" x2="633" y2="178" class="arrow"/>
+    <text x="638" y="196" class="label-sm">DB query</text>
+
+    <!-- Appointment Engine → Tools -->
+    <line x1="610" y1="175" x2="610" y2="205" class="arrow"/>
+
+    <!-- LLM → TTS -->
+    <line x1="365" y1="245" x2="338" y2="245" class="arrow"/>
+    <text x="340" y="240" class="label-sm">Text</text>
+
+    <!-- TTS → WS -->
+    <line x1="255" y1="205" x2="255" y2="168" class="arrow"/>
+    <text x="260" y="190" class="label-sm">Audio</text>
+
+    <!-- WS ↔ Browser -->
+    <line x1="838" y1="135" x2="340" y2="135" class="arrow"/>
+    <text x="600" y="128" class="label-sm">WebSocket (JSON + binary)</text>
+
+    <!-- Agent ↔ Redis -->
+    <line x1="400" y1="285" x2="290" y2="388" class="arrow"/>
+    <text x="318" y="348" class="label-sm">Session R/W</text>
+
+    <!-- Agent ↔ PG -->
+    <line x1="445" y1="285" x2="415" y2="388" class="arrow"/>
+    <text x="440" y="350" class="label-sm">History R/W</text>
+
+    <!-- Campaign → Twilio -->
+    <line x1="690" y1="430" x2="712" y2="430" class="arrow"/>
+
+    <!-- Twilio → WS -->
+    <line x1="765" y1="388" x2="340" y2="170" class="arrow"/>
+
+    <!-- ── Language badge ────────────────────────────── -->
+    <rect x="835" y="240" width="160" height="100" rx="6" fill="#0e1117" stroke="#333"/>
+    <text x="915" y="262" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">MULTILINGUAL</text>
+    <text x="915" y="282" text-anchor="middle" fill="white" font-size="12" font-weight="700">EN · HI · TA</text>
+    <text x="915" y="302" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="9">Auto-detected by Deepgram</text>
+    <text x="915" y="318" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="9">Unicode fallback (Devanagari/Tamil)</text>
+    <text x="915" y="333" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="9">LLM responds in patient's language</text>
+
+    <!-- ── Latency badge ─────────────────────────────── -->
+    <rect x="835" y="390" width="160" height="100" rx="6" fill="#d4f0e8" stroke="#0a7c5c"/>
+    <text x="915" y="412" text-anchor="middle" fill="#0a7c5c" font-size="11" font-weight="700">LATENCY BUDGET</text>
+    <text x="915" y="432" text-anchor="middle" fill="#1c1c2e" font-size="11">STT ~120ms</text>
+    <text x="915" y="450" text-anchor="middle" fill="#1c1c2e" font-size="11">LLM ~200ms</text>
+    <text x="915" y="468" text-anchor="middle" fill="#1c1c2e" font-size="11">TTS ~100ms</text>
+    <text x="915" y="486" text-anchor="middle" fill="#0a7c5c" font-size="13" font-weight="700">Total &lt; 450ms ✓</text>
+  </svg>
+</div>
+<p style="text-align:center;margin-top:20px;font-size:11px;color:#999">2Care.ai · Real-Time Multilingual Voice AI Agent · Architecture Diagram · Print this page to PDF for submission</p>
+</body>
+</html>

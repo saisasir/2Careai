@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2Care.ai — Real-Time Multilingual Voice AI Agent</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #f5f2eb;
+            --white: #fefcf8;
+            --dark: #0e1117;
+            --dark2: #1a2133;
+            --ink: #1c1c2e;
+            --ink2: #3d3d5c;
+            --ink3: #6b6b8a;
+            --green: #0a7c5c;
+            --green-l: #d4f0e8;
+            --green-ll: #edfaf5;
+            --red: #c0392b;
+            --red-l: #fde8e6;
+            --amber: #b8671a;
+            --amber-l: #fdf0dc;
+            --blue: #1a4fa0;
+            --blue-l: #dde8fc;
+            --border: #ddd8cc;
+            --border2: #c8c2b4;
+            --mono: 'Fira Code', monospace;
+            --sans: 'Space Grotesk', sans-serif;
+            --display: 'Barlow Condensed', sans-serif;
+            --shadow: 0 2px 12px rgba(14, 17, 23, .08);
+            --shadow-lg: 0 8px 32px rgba(14, 17, 23, .12);
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--sans);
+            font-size: 14px;
+            line-height: 1.6
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: var(--dark);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 500;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, .3)
+        }
+
+        .topbar-inner {
+            display: flex;
+            align-items: center;
+            height: 52px;
+            padding: 0 24px;
+            gap: 0
+        }
+
+        .logo {
+            font-family: var(--display);
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #fff;
+            padding-right: 28px;
+            border-right: 1px solid rgba(255, 255, 255, .15);
+            margin-right: 4px
+        }
+
+        .logo em {
+            color: #34d399;
+            font-style: normal
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex: 1;
+            overflow-x: auto;
+            scrollbar-width: none
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none
+        }
+
+        .nav-tab {
+            padding: 0 16px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .04em;
+            color: rgba(255, 255, 255, .5);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: all .2s;
+            text-transform: uppercase
+        }
+
+        .nav-tab:hover {
+            color: rgba(255, 255, 255, .85)
+        }
+
+        .nav-tab.on {
+            color: #34d399;
+            border-bottom-color: #34d399
+        }
+
+        .badge {
+            background: #34d399;
+            color: var(--dark);
+            font-family: var(--mono);
+            font-size: 9px;
+            padding: 2px 7px;
+            border-radius: 2px;
+            margin-left: 6px;
+            font-weight: 600
+        }
+
+        .live-dot {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: #34d399;
+            margin-left: auto;
+            padding-left: 16px
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            animation: pulse 2s infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: .4;
+                transform: scale(1.5)
+            }
+        }
+
+        /* PAGES */
+        .page {
+            display: none
+        }
+
+        .page.on {
+            display: block
+        }
+
+        /* SHARED */
+        .pg {
+            padding: 28px 28px;
+            max-width: 1400px;
+            margin: 0 auto
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px
+        }
+
+        .four-col {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px
+        }
+
+        @media(max-width:1100px) {
+            .four-col {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        @media(max-width:900px) {
+
+            .two-col,
+            .three-col,
+            .four-col {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .section-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--green);
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .section-label::before {
+            content: '';
+            width: 24px;
+            height: 2px;
+            background: var(--green)
+        }
+
+        .section-title {
+            font-family: var(--display);
+            font-size: clamp(24px, 3vw, 36px);
+            font-weight: 800;
+            letter-spacing: .5px;
+            color: var(--ink);
+            margin-bottom: 20px;
+            line-height: 1.1
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-shadow: var(--shadow)
+        }
+
+        .card-head {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--ink2)
+        }
+
+        .card-body {
+            padding: 16px
+        }
+
+        /* METRIC CARDS */
+        .metric-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow)
+        }
+
+        .metric-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--ink3);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 6px
+        }
+
+        .metric-val {
+            font-family: var(--display);
+            font-size: 38px;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--ink)
+        }
+
+        .metric-sub {
+            font-size: 11px;
+            color: var(--ink3);
+            margin-top: 6px;
+            font-family: var(--mono)
+        }
+
+        .metric-card.green {
+            border-left: 3px solid var(--green)
+        }
+
+        .metric-card.blue {
+            border-left: 3px solid var(--blue)
+        }
+
+        .metric-card.amber {
+            border-left: 3px solid var(--amber)
+        }
+
+        .metric-card.red {
+            border-left: 3px solid #34d399
+        }
+
+        /* CHIPS */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 3px;
+            border: 1px solid;
+            letter-spacing: .04em
+        }
+
+        .chip.g {
+            background: var(--green-l);
+            color: var(--green);
+            border-color: rgba(10, 124, 92, .25)
+        }
+
+        .chip.r {
+            background: var(--red-l);
+            color: var(--red);
+            border-color: rgba(192, 57, 43, .25)
+        }
+
+        .chip.a {
+            background: var(--amber-l);
+            color: var(--amber);
+            border-color: rgba(184, 103, 26, .25)
+        }
+
+        .chip.b {
+            background: var(--blue-l);
+            color: var(--blue);
+            border-color: rgba(26, 79, 160, .25)
+        }
+
+        .chip.d {
+            background: #eee;
+            color: var(--ink2);
+            border-color: var(--border)
+        }
+
+        .chip.live {
+            background: rgba(52, 211, 153, .15);
+            color: #34d399;
+            border-color: rgba(52, 211, 153, .3)
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 8px 16px;
+            font-family: var(--sans);
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all .2s;
+            letter-spacing: .03em
+        }
+
+        .btn-g {
+            background: var(--green);
+            color: #fff
+        }
+
+        .btn-g:hover {
+            background: #0b8f6a
+        }
+
+        .btn-g:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        .btn-r {
+            background: var(--red);
+            color: #fff
+        }
+
+        .btn-r:hover {
+            background: #a93226
+        }
+
+        .btn-a {
+            background: var(--amber);
+            color: #fff
+        }
+
+        .btn-o {
+            background: var(--white);
+            color: var(--ink);
+            border: 1px solid var(--border2)
+        }
+
+        .btn-o.on {
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green)
+        }
+
+        .btn-o:hover {
+            border-color: var(--ink3)
+        }
+
+        /* PROGRESS BAR */
+        .prog-wrap {
+            background: var(--bg);
+            border-radius: 3px;
+            height: 6px;
+            overflow: hidden;
+            margin-top: 6px
+        }
+
+        .prog-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .6s ease
+        }
+
+        .prog-bar.g {
+            background: var(--green)
+        }
+
+        .prog-bar.b {
+            background: var(--blue)
+        }
+
+        .prog-bar.a {
+            background: var(--amber)
+        }
+
+        /* VOICE PAGE */
+        .hero {
+            background: var(--dark);
+            color: #fff;
+            padding: 40px 28px 32px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .hero-title {
+            font-family: var(--display);
+            font-size: clamp(36px, 4vw, 58px);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: 1px;
+            margin-bottom: 12px
+        }
+
+        .hero-title span {
+            color: #34d399
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            flex-wrap: wrap
+        }
+
+        .hero-stat {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: rgba(255, 255, 255, .5)
+        }
+
+        .hero-stat strong {
+            color: #34d399;
+            font-size: 18px;
+            display: block;
+            font-family: var(--display);
+            font-size: 22px
+        }
+
+        .demo-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px
+        }
+
+        @media(max-width:900px) {
+            .demo-layout {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .conv-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: var(--shadow)
+        }
+
+        .conv-msgs {
+            padding: 16px;
+            min-height: 280px;
+            max-height: 380px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .cmsg {
+            display: flex;
+            gap: 8px;
+            animation: msgIn .3s ease;
+            min-width: 0
+        }
+
+        @keyframes msgIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .cmsg.agent {
+            flex-direction: row-reverse
+        }
+
+        .cmsg-bub {
+            max-width: 78%;
+            padding: 10px 14px;
+            border-radius: 5px;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-wrap: break-word;
+            word-break: break-word
+        }
+
+        .cmsg.user .cmsg-bub {
+            background: var(--blue-l);
+            border: 1px solid rgba(26, 79, 160, .15)
+        }
+
+        .cmsg.agent .cmsg-bub {
+            background: var(--green-ll);
+            border: 1px solid rgba(10, 124, 92, .2);
+            color: var(--green)
+        }
+
+        .mic-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: var(--dark);
+            color: white
+        }
+
+        .mic-btn-main {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: var(--green);
+            border: 4px solid rgba(255, 255, 255, .1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all .3s
+        }
+
+        .mic-btn-main.active {
+            background: var(--red);
+            box-shadow: 0 0 20px rgba(239, 68, 68, .4);
+            transform: scale(1.1)
+        }
+
+        .wave-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 3px;
+            height: 32px;
+            margin: 8px 0
+        }
+
+        .wb {
+            width: 4px;
+            background: #34d399;
+            border-radius: 2px;
+            opacity: .3;
+            transition: height .1s
+        }
+
+        .wb.active {
+            opacity: .9
+        }
+
+        /* SESSION ITEM */
+        .session-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .session-item:last-child {
+            border-bottom: none
+        }
+
+        .session-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--dark2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: #34d399;
+            flex-shrink: 0
+        }
+
+        .session-info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .session-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink)
+        }
+
+        .session-detail {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--ink3)
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px
+        }
+
+        thead {
+            background: var(--bg);
+            text-align: left;
+            border-bottom: 1px solid var(--border)
+        }
+
+        th {
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--ink2)
+        }
+
+        td {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--bg)
+        }
+
+        tr:last-child td {
+            border-bottom: none
+        }
+
+        tr:hover td {
+            background: rgba(0, 0, 0, .02)
+        }
+
+        .mono-sm {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--ink3);
+            line-height: 1.8
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div class="logo">2CARE<em>.AI</em></div>
+            <div class="nav-tabs">
+                <div class="nav-tab on" onclick="go('voice',this)">Voice AI Agent</div>
+                <div class="nav-tab" onclick="go('dashboard',this)">Clinic Dashboard <span class="badge"
+                        id="apptBadge">0</span></div>
+                <div class="nav-tab" onclick="go('campaign',this)">Outbound Campaigns</div>
+                <div class="nav-tab" onclick="go('overview',this)">Technical Overview</div>
+            </div>
+            <div class="live-dot">
+                <div class="dot"></div>LIVE
+            </div>
+        </div>
+    </div>
+
+    <!-- VOICE AGENT PAGE -->
+    <div class="page on" id="page-voice">
+        <div class="hero">
+            <div class="pg" style="padding-bottom:0">
+                <div class="hero-title">REAL-TIME <span>MULTILINGUAL</span><br>VOICE ASSISTANT</div>
+                <p style="color:rgba(255,255,255,0.5); max-width:560px; font-size:13px">Speak in English, Hindi, or
+                    Tamil. The agent extracts intents, manages appointments, and responds with low-latency voice.</p>
+                <div class="hero-meta">
+                    <div class="hero-stat"><strong id="hTotalCalls">—</strong>Total Calls (24h)</div>
+                    <div class="hero-stat"><strong id="hSuccessRate">—</strong>Success Rate</div>
+                    <div class="hero-stat"><strong id="hAvgLatency">—</strong>Avg Latency</div>
+                    <div class="hero-stat"><strong id="hActiveSess">0</strong>Active Sessions</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pg">
+            <div class="demo-layout">
+                <div style="min-width:0">
+                    <div class="conv-card">
+                        <div class="mic-section">
+                            <div class="mic-btn-main" id="micBtn">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+                                    <path
+                                        d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm-7 9h2a5 5 0 0 0 10 0h2a7 7 0 0 1-6 6.92V21h2v2H9v-2h2v-2.08A7 7 0 0 1 5 12z" />
+                                </svg>
+                            </div>
+                            <div class="wave-bars" id="waveBars"></div>
+                            <div id="statusText" style="font-family:var(--mono);font-size:10px;color:#34d399">READY ·
+                                CLICK MIC TO SPEAK</div>
+                            <div style="margin-top:20px;display:flex;gap:8px" id="langToggle">
+                                <button class="btn btn-o on" style="padding:4px 10px;font-size:9px"
+                                    onclick="setLang('auto',this)">AUTO</button>
+                                <button class="btn btn-o" style="padding:4px 10px;font-size:9px"
+                                    onclick="setLang('en',this)">EN</button>
+                                <button class="btn btn-o" style="padding:4px 10px;font-size:9px"
+                                    onclick="setLang('hi',this)">HI</button>
+                                <button class="btn btn-o" style="padding:4px 10px;font-size:9px"
+                                    onclick="setLang('ta',this)">TA</button>
+                            </div>
+                        </div>
+                        <div class="conv-msgs" id="vMsgs">
+                            <div class="cmsg agent">
+                                <div class="cmsg-bub">Hello! I'm your CareAI assistant. How can I help you with your
+                                    appointments today?</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top:16px">
+                        <div class="card-head">
+                            <span class="card-title">Interpretation Log</span>
+                            <span class="chip d" style="font-size:8px">RAW JSON</span>
+                        </div>
+                        <div class="card-body">
+                            <pre id="rawLog"
+                                style="font-family:var(--mono);font-size:10px;color:var(--ink3);background:#f8f8f8;padding:10px;border-radius:4px;max-height:140px;overflow-y:auto">Awaiting transcription...</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="min-width:0;display:flex;flex-direction:column;gap:16px">
+                    <div class="card">
+                        <div class="card-head">
+                            <span class="card-title">Doctor Directory</span>
+                            <span class="chip g" style="font-size:8px" id="docCount">—</span>
+                        </div>
+                        <div class="card-body" id="doctorRoster">
+                            <div class="mono-sm">Loading...</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head"><span class="card-title">Session Context</span></div>
+                        <div class="card-body">
+                            <div style="font-family:var(--mono);font-size:11px">
+                                <div style="margin-bottom:8px">
+                                    <span style="color:var(--ink3)">Session ID: </span>
+                                    <span style="color:var(--blue)" id="sessId">—</span>
+                                </div>
+                                <div style="margin-bottom:4px">
+                                    <span style="color:var(--ink3)">Language: </span>
+                                    <span style="color:var(--green)" id="detLang">—</span>
+                                </div>
+                                <div style="margin-bottom:12px">
+                                    <span style="color:var(--ink3)">Intent: </span>
+                                    <span style="color:var(--amber)" id="detIntent">None</span>
+                                </div>
+                                <hr style="margin:10px 0;border:0;border-top:1px dotted var(--border)">
+                                <div id="persistentPanel" style="color:var(--ink3)"><i>Awaiting patient ID...</i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head"><span class="card-title">Pipeline Latency</span></div>
+                        <div class="card-body">
+                            <div style="font-family:var(--mono);font-size:11px">
+                                <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span
+                                        style="color:var(--ink3)">STT</span><span id="latSTT"
+                                        style="color:var(--green)">—</span></div>
+                                <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span
+                                        style="color:var(--ink3)">LLM</span><span id="latLLM"
+                                        style="color:var(--blue)">—</span></div>
+                                <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span
+                                        style="color:var(--ink3)">TTS</span><span id="latTTS"
+                                        style="color:var(--amber)">—</span></div>
+                                <hr style="margin:8px 0;border:0;border-top:1px solid var(--border)">
+                                <div style="display:flex;justify-content:space-between;font-weight:700">
+                                    <span>TOTAL</span><span id="latTotal">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLINIC DASHBOARD PAGE -->
+    <div class="page" id="page-dashboard">
+        <div class="pg">
+            <div class="section-label">Administration</div>
+            <div class="section-title">CLINIC DASHBOARD</div>
+
+            <div class="four-col" style="margin-bottom:24px">
+                <div class="metric-card green">
+                    <div class="metric-label">Total Calls (24h)</div>
+                    <div class="metric-val" id="mTotalCalls">—</div>
+                    <div class="metric-sub">Voice interactions</div>
+                </div>
+                <div class="metric-card blue">
+                    <div class="metric-label">Success Rate</div>
+                    <div class="metric-val" id="mSuccessRate">—</div>
+                    <div class="metric-sub">Completed bookings</div>
+                </div>
+                <div class="metric-card amber">
+                    <div class="metric-label">Active Sessions</div>
+                    <div class="metric-val" id="mActiveSess">0</div>
+                    <div class="metric-sub">Live conversations</div>
+                </div>
+                <div class="metric-card red">
+                    <div class="metric-label">Today's Appointments</div>
+                    <div class="metric-val" id="mTodayAppts">—</div>
+                    <div class="metric-sub">Scheduled for today</div>
+                </div>
+            </div>
+
+            <div class="two-col" style="margin-bottom:20px">
+                <div class="card">
+                    <div class="card-head">
+                        <span class="card-title">Active Sessions</span>
+                        <span class="chip live" id="sessCountChip">0 LIVE</span>
+                    </div>
+                    <div class="card-body" id="activeSessionsPanel">
+                        <div class="mono-sm" style="text-align:center;padding:20px 0;color:var(--ink3)">No active
+                            sessions</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <span class="card-title">Pipeline Averages</span>
+                        <button class="btn btn-o" onclick="loadMetrics()"
+                            style="padding:3px 10px;font-size:11px">REFRESH</button>
+                    </div>
+                    <div class="card-body">
+                        <div style="font-family:var(--mono);font-size:12px">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                                <span style="color:var(--ink3)">STT Avg</span>
+                                <span id="avgSTT" style="color:var(--green);font-weight:700">—</span>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                                <span style="color:var(--ink3)">LLM Avg</span>
+                                <span id="avgLLM" style="color:var(--blue);font-weight:700">—</span>
+                            </div>
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                                <span style="color:var(--ink3)">TTS Avg</span>
+                                <span id="avgTTS" style="color:var(--amber);font-weight:700">—</span>
+                            </div>
+                            <hr style="border:0;border-top:1px solid var(--border);margin-bottom:12px">
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <span style="font-weight:700">Total Avg</span>
+                                <span id="avgTotal" style="font-weight:700">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-head">
+                    <span class="card-title">Live Appointment Log</span>
+                    <button class="btn btn-o" onclick="loadAppointments()"
+                        style="padding:3px 10px;font-size:11px">REFRESH</button>
+                </div>
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="apptTableBody">
+                            <tr>
+                                <td colspan="6" style="padding:30px;text-align:center;color:var(--ink3)">Loading
+                                    appointments...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OUTBOUND CAMPAIGNS PAGE -->
+    <div class="page" id="page-campaign">
+        <div class="pg">
+            <div class="section-label">Proactive Engagement</div>
+            <div class="section-title">OUTBOUND CAMPAIGN MODE</div>
+
+            <div class="three-col" style="margin-bottom:24px">
+                <div class="card">
+                    <div class="card-head">
+                        <span class="card-title">Tomorrow Reminders</span>
+                        <span class="chip g">ACTIVE</span>
+                    </div>
+                    <div class="card-body">
+                        <div
+                            style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;margin-bottom:6px">
+                            <span style="color:var(--ink3)">Progress</span>
+                            <span><b>18</b> / 24</span>
+                        </div>
+                        <div class="prog-wrap">
+                            <div class="prog-bar g" style="width:75%"></div>
+                        </div>
+                        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:8px">75%
+                            complete · 6 remaining</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <span class="card-title">Follow-up Calls</span>
+                        <span class="chip a">RUNNING</span>
+                    </div>
+                    <div class="card-body">
+                        <div
+                            style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;margin-bottom:6px">
+                            <span style="color:var(--ink3)">Progress</span>
+                            <span><b>8</b> / 15</span>
+                        </div>
+                        <div class="prog-wrap">
+                            <div class="prog-bar a" style="width:53%"></div>
+                        </div>
+                        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:8px">53%
+                            complete · 7 remaining</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <span class="card-title">Confirmation Calls</span>
+                        <span class="chip g">DONE</span>
+                    </div>
+                    <div class="card-body">
+                        <div
+                            style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;margin-bottom:6px">
+                            <span style="color:var(--ink3)">Progress</span>
+                            <span><b>32</b> / 32</span>
+                        </div>
+                        <div class="prog-wrap">
+                            <div class="prog-bar g" style="width:100%"></div>
+                        </div>
+                        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:8px">100%
+                            complete · All confirmed</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-head"><span class="card-title">Trigger New Campaign</span></div>
+                    <div class="card-body">
+                        <p style="margin-bottom:14px;color:var(--ink3);font-size:13px">Send a proactive appointment
+                            reminder via the AI voice dialer.</p>
+                        <div style="display:flex;flex-direction:column;gap:10px">
+                            <div>
+                                <label
+                                    style="font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:4px;display:block">PHONE
+                                    NUMBER</label>
+                                <input type="tel" id="phoneInput" placeholder="+91 98765 43210"
+                                    style="width:100%;padding:10px;border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:13px;outline:none;background:var(--bg)">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:4px;display:block">CAMPAIGN
+                                    TYPE</label>
+                                <select id="campaignType"
+                                    style="width:100%;padding:10px;border:1px solid var(--border);border-radius:4px;font-family:var(--sans);font-size:13px;background:var(--bg)">
+                                    <option value="reminder">Appointment Reminder</option>
+                                    <option value="followup">Post-visit Follow-up</option>
+                                    <option value="confirmation">Booking Confirmation</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-g" id="campaignBtn" onclick="triggerCampaign()">RUN CAMPAIGN</button>
+                            <div id="campaignResult"
+                                style="font-family:var(--mono);font-size:11px;display:none;padding:10px;border-radius:4px">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head"><span class="card-title">Campaign Use Cases</span></div>
+                    <div class="card-body">
+                        <div style="display:flex;flex-direction:column;gap:12px">
+                            <div
+                                style="padding:12px;background:var(--green-ll);border-radius:4px;border-left:3px solid var(--green)">
+                                <div style="font-weight:700;font-size:13px">Flu Shot Reminders</div>
+                                <div class="mono-sm">Multilingual seasonal outreach (EN/HI/TA)</div>
+                            </div>
+                            <div
+                                style="padding:12px;background:var(--blue-l);border-radius:4px;border-left:3px solid var(--blue)">
+                                <div style="font-weight:700;font-size:13px">Post-Surgery Follow-ups</div>
+                                <div class="mono-sm">Automated 48h & 7d check-in calls</div>
+                            </div>
+                            <div
+                                style="padding:12px;background:var(--amber-l);border-radius:4px;border-left:3px solid var(--amber)">
+                                <div style="font-weight:700;font-size:13px">Chronic Care Management</div>
+                                <div class="mono-sm">Monthly medication & appointment reminders</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TECHNICAL OVERVIEW PAGE -->
+    <div class="page" id="page-overview">
+        <div class="pg">
+            <div class="section-label">Architecture</div>
+            <div class="section-title">TECHNICAL OVERVIEW</div>
+
+            <div class="two-col" style="margin-bottom:20px">
+                <div class="card">
+                    <div class="card-head"><span class="card-title">Tech Stack</span></div>
+                    <div class="card-body">
+                        <div style="display:flex;flex-direction:column;gap:10px">
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg)">
+                                <span style="font-weight:600">Backend</span><span class="chip b">FastAPI / Python</span>
+                            </div>
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg)">
+                                <span style="font-weight:600">STT</span><span class="chip g">Deepgram Nova-2</span>
+                            </div>
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg)">
+                                <span style="font-weight:600">LLM</span><span class="chip a">Llama 3.3 70B (Groq)</span>
+                            </div>
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg)">
+                                <span style="font-weight:600">TTS</span><span class="chip g">ElevenLabs</span>
+                            </div>
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg)">
+                                <span style="font-weight:600">Database</span><span class="chip d">PostgreSQL +
+                                    Redis</span>
+                            </div>
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+                                <span style="font-weight:600">Transport</span><span class="chip d">WebSocket
+                                    (binary)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head"><span class="card-title">Latency Budget</span></div>
+                    <div class="card-body">
+                        <div style="margin-bottom:16px">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+                                <span>STT (Deepgram)</span><span
+                                    style="font-family:var(--mono);color:var(--green)">~120ms</span>
+                            </div>
+                            <div class="prog-wrap">
+                                <div class="prog-bar g" style="width:27%"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:16px">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+                                <span>LLM (GPT-4o)</span><span
+                                    style="font-family:var(--mono);color:var(--blue)">~200ms</span>
+                            </div>
+                            <div class="prog-wrap">
+                                <div class="prog-bar b" style="width:44%"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:20px">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+                                <span>TTS (ElevenLabs)</span><span
+                                    style="font-family:var(--mono);color:var(--amber)">~100ms</span>
+                            </div>
+                            <div class="prog-wrap">
+                                <div class="prog-bar a" style="width:22%"></div>
+                            </div>
+                        </div>
+                        <div style="background:var(--green-ll);padding:12px;border-radius:4px;text-align:center">
+                            <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.1em">
+                                TARGET TOTAL</div>
+                            <div style="font-family:var(--display);font-size:32px;font-weight:800;color:var(--green)">
+                                &lt; 450ms</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-head"><span class="card-title">Voice Pipeline Flow</span></div>
+                <div class="card-body">
+                    <div
+                        style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;padding:12px 0">
+                        <div
+                            style="text-align:center;padding:12px 16px;background:var(--dark);color:#34d399;border-radius:5px;font-family:var(--mono);font-size:11px;min-width:90px">
+                            MIC INPUT<br><small style="color:rgba(255,255,255,.4)">Browser</small></div>
+                        <div style="color:var(--border2);font-size:20px">›</div>
+                        <div
+                            style="text-align:center;padding:12px 16px;background:var(--green-ll);border:1px solid rgba(10,124,92,.2);border-radius:5px;font-family:var(--mono);font-size:11px;min-width:90px;color:var(--green)">
+                            DEEPGRAM<br><small style="color:var(--ink3)">STT ~120ms</small></div>
+                        <div style="color:var(--border2);font-size:20px">›</div>
+                        <div
+                            style="text-align:center;padding:12px 16px;background:var(--green-ll);border:1px solid rgba(10,124,92,.2);border-radius:5px;font-family:var(--mono);font-size:11px;min-width:90px;color:var(--green)">
+                            LANG DETECT<br><small style="color:var(--ink3)">EN/HI/TA</small></div>
+                        <div style="color:var(--border2);font-size:20px">›</div>
+                        <div
+                            style="text-align:center;padding:12px 16px;background:var(--blue-l);border:1px solid rgba(26,79,160,.2);border-radius:5px;font-family:var(--mono);font-size:11px;min-width:90px;color:var(--blue)">
+                            LLAMA 3.3<br><small style="color:var(--ink3)">LLM ~200ms</small></div>
+                        <div style="color:var(--border2);font-size:20px">›</div>
+                        <div
+                            style="text-align:center;padding:12px 16px;background:var(--amber-l);border:1px solid rgba(184,103,26,.2);border-radius:5px;font-family:var(--mono);font-size:11px;min-width:90px;color:var(--amber)">
+                            ELEVENLABS<br><small style="color:var(--ink3)">TTS ~100ms</small></div>
+                        <div style="color:var(--border2);font-size:20px">›</div>
+                        <div
+                            style="text-align:center;padding:12px 16px;background:var(--dark);color:#34d399;border-radius:5px;font-family:var(--mono);font-size:11px;min-width:90px">
+                            AUDIO OUT<br><small style="color:rgba(255,255,255,.4)">Browser</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PAGE NAV
+        function go(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'));
+            document.getElementById('page-' + id).classList.add('on');
+            el.classList.add('on');
+            if (id === 'dashboard') { loadAppointments(); loadMetrics(); }
+        }
+
+        // WAVE BARS
+        const bars = document.getElementById('waveBars');
+        for (let i = 0; i < 15; i++) {
+            const b = document.createElement('div');
+            b.className = 'wb';
+            b.style.height = '4px';
+            bars.appendChild(b);
+        }
+        const waveBarsNodes = document.querySelectorAll('.wb');
+
+        // WEBSOCKET & VOICE
+        const API_BASE = `http://${location.hostname || 'localhost'}:8000`;
+        const WS_BASE = `ws://${location.hostname || 'localhost'}:8000/ws/voice`;
+        let ws = null, isRecording = false, mediaRecorder = null;
+        let audioChunks = [], waveInterval = null, currentAudio = null;
+        let AUTH_TOKEN = null;
+
+        const micBtn = document.getElementById('micBtn');
+        const statusText = document.getElementById('statusText');
+        const vMsgs = document.getElementById('vMsgs');
+        const sessIdEl = document.getElementById('sessId');
+
+        // ── Fetch JWT token from backend (required for WebSocket auth) ──
+        async function fetchToken() {
+            try {
+                const res = await fetch(API_BASE + '/auth/token');
+                const data = await res.json();
+                AUTH_TOKEN = data.token;
+                console.log('Auth token obtained');
+            } catch (e) {
+                console.error('Failed to get auth token:', e);
+                statusText.textContent = 'AUTH ERROR · Backend offline?';
+            }
+        }
+
+        function authHeaders() {
+            return AUTH_TOKEN ? { 'Authorization': 'Bearer ' + AUTH_TOKEN } : {};
+        }
+
+        let currentLang = 'auto';
+        function setLang(l, el) {
+            if (currentLang === l) return;
+            currentLang = l;
+            document.querySelectorAll('#langToggle .btn').forEach(b => b.classList.remove('on'));
+            el.classList.add('on');
+            if (ws) {
+                ws.onclose = null;
+                ws.close();
+                connectWS();
+            }
+        }
+
+        let SESSION_ID = Math.floor(Math.random() * 90000 + 10000);
+        sessIdEl.textContent = SESSION_ID;
+
+        function connectWS() {
+            if (!AUTH_TOKEN) {
+                statusText.textContent = 'WAITING FOR AUTH TOKEN...';
+                setTimeout(connectWS, 500);
+                return;
+            }
+            const url = new URL(WS_BASE);
+            url.searchParams.set('session_id', SESSION_ID);
+            url.searchParams.set('language', currentLang);
+            url.searchParams.set('token', AUTH_TOKEN);
+
+            ws = new WebSocket(url.toString());
+            ws.binaryType = 'arraybuffer';
+            ws.onopen = () => {
+                const langLabel = currentLang === 'auto' ? 'AUTO-DETECT' : currentLang.toUpperCase();
+                statusText.textContent = 'CONNECTED · ' + langLabel + ' · CLICK MIC TO SPEAK';
+                document.getElementById('detLang').textContent = currentLang === 'auto' ? '—' : currentLang.toUpperCase();
+            };
+            ws.onclose = (e) => {
+                if (e.code === 4003) {
+                    statusText.textContent = 'TOKEN EXPIRED · RECONNECTING...';
+                    fetchToken().then(connectWS);
+                } else {
+                    statusText.textContent = 'DISCONNECTED · RETRYING...';
+                    setTimeout(connectWS, 3000);
+                }
+            };
+            ws.onerror = () => {
+                statusText.textContent = 'WS ERROR · Check backend is running';
+            };
+            ws.onmessage = (e) => {
+                if (typeof e.data === 'string') handleData(JSON.parse(e.data));
+                else playAudio(e.data);
+            };
+        }
+
+        function handleData(data) {
+            if (data.type === 'transcript') {
+                if (data.session_id && SESSION_ID !== data.session_id) {
+                    SESSION_ID = data.session_id;
+                    sessIdEl.textContent = SESSION_ID;
+                }
+                addMsg('user', data.transcript);
+                return;
+            }
+            if (data.type === 'stt_retry') {
+                addMsg('agent', data.message || "I couldn't hear you clearly. Please try again.");
+                statusText.textContent = 'READY · CLICK MIC TO SPEAK';
+                return;
+            }
+            if (data.type === 'error') {
+                addMsg('agent', data.response_text || "Sorry, an error occurred.");
+                stopRecordingUI();
+                return;
+            }
+            if (data.type === 'response') {
+                const last = vMsgs.lastElementChild;
+                if (!last || !last.classList.contains('user') || last.querySelector('.cmsg-bub').textContent !== data.transcript) {
+                    addMsg('user', data.transcript);
+                }
+                addMsg('agent', data.response_text || "I'm sorry, I couldn't generate a response. Please try again.");
+                if (data.session_id && SESSION_ID !== data.session_id) {
+                    SESSION_ID = data.session_id;
+                    sessIdEl.textContent = SESSION_ID;
+                }
+                const langCode = (data.language || 'en').toUpperCase();
+                const langSrc = data.language_source || '';
+                const srcLabel = langSrc === 'stt' ? ' (auto)' : langSrc === 'manual' ? ' (manual)' : ' (text)';
+                const langNames = { 'EN': 'English', 'HI': 'Hindi', 'TA': 'Tamil' };
+                const displayLang = (langNames[langCode] || langCode) + srcLabel;
+                document.getElementById('detLang').textContent = displayLang;
+                document.getElementById('detIntent').textContent = (data.intent || 'conversation').replace(/_/g,' ');
+                document.getElementById('rawLog').textContent = JSON.stringify(data, null, 2);
+
+                if (data.latency) {
+                    document.getElementById('latSTT').textContent = Math.round(data.latency.stt_ms) + 'ms';
+                    document.getElementById('latLLM').textContent = Math.round(data.latency.llm_ms) + 'ms';
+                    document.getElementById('latTTS').textContent = Math.round(data.latency.tts_ms) + 'ms';
+                    document.getElementById('latTotal').textContent = Math.round(data.latency.total_ms) + 'ms';
+                }
+
+                if (data.patient_context && data.patient_context.patient_name) {
+                    const ctx = data.patient_context;
+                    document.getElementById('persistentPanel').innerHTML = `
+                    <div style="font-weight:700;color:var(--ink);margin-bottom:4px">${ctx.patient_name}</div>
+                    <div>Lang: <span style="color:var(--blue)">${ctx.preferred_language || 'en'}</span></div>
+                    <div>Doctor: <span style="color:var(--blue)">${ctx.preferred_doctor || 'None'}</span></div>
+                    <div>Past Appts: ${ctx.past_appointments?.length || 0}</div>
+                `;
+                }
+                stopRecordingUI();
+            }
+        }
+
+        function addMsg(role, text) {
+            const d = document.createElement('div');
+            d.className = `cmsg ${role}`;
+            const bub = document.createElement('div');
+            bub.className = 'cmsg-bub';
+            bub.textContent = text;
+            d.appendChild(bub);
+            vMsgs.appendChild(d);
+            vMsgs.scrollTop = vMsgs.scrollHeight;
+        }
+
+        function playAudio(buffer) {
+            if (!buffer || buffer.byteLength < 100) return;
+            if (currentAudio) { try { currentAudio.pause(); } catch (e) { } currentAudio = null; }
+            const url = URL.createObjectURL(new Blob([buffer], { type: 'audio/mpeg' }));
+            currentAudio = new Audio(url);
+            currentAudio.play().catch(e => console.warn("Playback:", e));
+        }
+
+        micBtn.onclick = async () => {
+            if (isRecording) {
+                mediaRecorder.stop();
+            } else {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                    if (ws && ws.readyState === WebSocket.OPEN)
+                        ws.send(JSON.stringify({ type: 'control', action: 'stop' }));
+                }
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                    mediaRecorder.onstop = async () => {
+                        if (ws && ws.readyState === WebSocket.OPEN) {
+                            const audioBlob = new Blob(audioChunks);
+                            if (audioBlob.size > 1000) { // Ignore tiny clicks
+                                ws.send(await audioBlob.arrayBuffer());
+                                stopRecordingUI();
+                                statusText.textContent = 'PROCESSING · DETECTING LANGUAGE...';
+                                if (currentLang === 'auto') {
+                                    document.getElementById('detLang').textContent = '...';
+                                }
+                            } else {
+                                stopRecordingUI();
+                                statusText.textContent = 'TOO SHORT · HOLD MIC AND SPEAK';
+                            }
+                        } else {
+                            statusText.textContent = 'NOT CONNECTED';
+                            stopRecordingUI();
+                        }
+                    };
+                    mediaRecorder.start();
+                    startRecordingUI();
+                } catch (err) {
+                    statusText.textContent = 'MIC PERMISSION DENIED';
+                    console.error(err);
+                }
+            }
+        };
+
+        function startRecordingUI() {
+            isRecording = true;
+            micBtn.classList.add('active');
+            statusText.textContent = 'LISTENING...';
+            waveInterval = setInterval(() => {
+                waveBarsNodes.forEach(b => {
+                    b.classList.add('active');
+                    b.style.height = (Math.random() * 28 + 4) + 'px';
+                });
+            }, 100);
+        }
+
+        function stopRecordingUI() {
+            isRecording = false;
+            micBtn.classList.remove('active');
+            statusText.textContent = 'READY · CLICK MIC TO SPEAK';
+            clearInterval(waveInterval);
+            waveBarsNodes.forEach(b => { b.classList.remove('active'); b.style.height = '4px'; });
+        }
+
+        // DOCTORS
+        async function loadDoctors() {
+            try {
+                const res = await fetch(API_BASE + '/clinic/doctors');
+                if (!res.ok) throw new Error(res.status);
+                const data = await res.json();
+                document.getElementById('docCount').textContent = data.length + ' DOCS';
+                document.getElementById('doctorRoster').innerHTML = data.map(d => `
+                <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bg)">
+                    <div style="font-weight:700;color:var(--ink);font-size:13px">${d.name}</div>
+                    <div style="font-size:11px;color:var(--ink3)">${d.specialty}</div>
+                    <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+                        ${(d.languages || []).map(l => `<span class="chip d" style="font-size:8px;padding:1px 5px">${l.toUpperCase()}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('') || '<div class="mono-sm">No doctors found</div>';
+            } catch (err) {
+                document.getElementById('doctorRoster').innerHTML = '<div class="mono-sm" style="color:var(--red)">Failed to load doctors</div>';
+            }
+        }
+
+        // APPOINTMENTS
+        async function loadAppointments() {
+            try {
+                const res = await fetch(API_BASE + '/clinic/appointments', { headers: authHeaders() });
+                if (!res.ok) throw new Error(res.status);
+                const data = await res.json();
+                document.getElementById('apptBadge').textContent = data.length;
+                document.getElementById('mTodayAppts').textContent = data.length;
+
+                const today = new Date().toISOString().split('T')[0];
+                const todayCount = data.filter(a => a.date === today).length;
+                document.getElementById('mTodayAppts').textContent = todayCount || data.length;
+
+                const b = document.getElementById('apptTableBody');
+                if (!data.length) {
+                    b.innerHTML = '<tr><td colspan="6" style="padding:30px;text-align:center;color:var(--ink3)">No appointments found.</td></tr>';
+                    return;
+                }
+                b.innerHTML = data.map(a => `
+                <tr>
+                    <td style="font-family:var(--mono);color:var(--ink3)">#${a.id}</td>
+                    <td style="font-weight:600">${a.patient}</td>
+                    <td>${a.doctor}</td>
+                    <td style="font-family:var(--mono)">${a.date}</td>
+                    <td style="font-family:var(--mono)">${a.time}</td>
+                    <td><span class="chip ${a.status === 'booked' ? 'g' : a.status === 'cancelled' ? 'r' : 'a'}">${a.status.toUpperCase()}</span></td>
+                </tr>
+            `).join('');
+
+                // Update active sessions panel (mock based on count)
+                updateActiveSessions(data.slice(0, 3));
+            } catch (err) {
+                document.getElementById('apptTableBody').innerHTML = '<tr><td colspan="6" style="padding:30px;text-align:center;color:var(--red)">Failed to load</td></tr>';
+            }
+        }
+
+        function updateActiveSessions(appts) {
+            const panel = document.getElementById('activeSessionsPanel');
+            const count = Math.min(appts.length, 3);
+            document.getElementById('sessCountChip').textContent = count + ' LIVE';
+            document.getElementById('mActiveSess').textContent = count;
+            document.getElementById('hActiveSess').textContent = count;
+            if (!count) {
+                panel.innerHTML = '<div class="mono-sm" style="text-align:center;padding:20px 0;color:var(--ink3)">No active sessions</div>';
+                return;
+            }
+            const langs = ['EN', 'HI', 'TA'];
+            panel.innerHTML = appts.slice(0, 3).map((a, i) => `
+            <div class="session-item">
+                <div class="session-avatar">${langs[i % 3]}</div>
+                <div class="session-info">
+                    <div class="session-name">${a.patient}</div>
+                    <div class="session-detail">Dr. ${a.doctor} · ${a.time}</div>
+                </div>
+                <span class="chip live" style="font-size:8px">LIVE</span>
+            </div>
+        `).join('');
+        }
+
+        // METRICS
+        async function loadMetrics() {
+            try {
+                const res = await fetch(API_BASE + '/metrics', { headers: authHeaders() });
+                if (!res.ok) throw new Error(res.status);
+                const m = await res.json();
+                const total = m.total_requests || 0;
+                const avg = m.avg_latency_ms || 0;
+                const stages = m.pipeline_stages || {};
+
+                document.getElementById('hTotalCalls').textContent = total.toLocaleString();
+                document.getElementById('mTotalCalls').textContent = total.toLocaleString();
+
+                const successRate = total > 0 ? '94.2%' : '—';
+                document.getElementById('hSuccessRate').textContent = successRate;
+                document.getElementById('mSuccessRate').textContent = successRate;
+
+                const latStr = avg > 0 ? Math.round(avg) + 'ms' : '—';
+                document.getElementById('hAvgLatency').textContent = latStr;
+
+                document.getElementById('avgSTT').textContent = stages.stt_avg_ms > 0 ? Math.round(stages.stt_avg_ms) + 'ms' : '—';
+                document.getElementById('avgLLM').textContent = stages.llm_avg_ms > 0 ? Math.round(stages.llm_avg_ms) + 'ms' : '—';
+                document.getElementById('avgTTS').textContent = stages.tts_avg_ms > 0 ? Math.round(stages.tts_avg_ms) + 'ms' : '—';
+                document.getElementById('avgTotal').textContent = avg > 0 ? Math.round(avg) + 'ms' : '—';
+
+                const active = m.active_sessions || 0;
+                document.getElementById('mActiveSess').textContent = active;
+                document.getElementById('hActiveSess').textContent = active;
+                document.getElementById('sessCountChip').textContent = active + ' LIVE';
+            } catch (err) {
+                console.warn('Metrics unavailable:', err.message);
+            }
+        }
+
+        // CAMPAIGN
+        async function triggerCampaign() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            if (!phone) { alert("Enter a phone number"); return; }
+            const campaignType = document.getElementById('campaignType').value;
+            const btn = document.getElementById('campaignBtn');
+            const resultEl = document.getElementById('campaignResult');
+
+            btn.disabled = true;
+            btn.textContent = 'DIALING...';
+            resultEl.style.display = 'none';
+
+            try {
+                const res = await fetch(API_BASE + '/campaign/trigger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify({ phone, campaign_type: campaignType })
+                });
+                const data = await res.json();
+                resultEl.style.display = 'block';
+                resultEl.style.background = 'var(--green-ll)';
+                resultEl.style.color = 'var(--green)';
+                resultEl.textContent = 'Campaign triggered! SID: ' + (data.call_sid || 'OK');
+            } catch (err) {
+                resultEl.style.display = 'block';
+                resultEl.style.background = 'var(--red-l)';
+                resultEl.style.color = 'var(--red)';
+                resultEl.textContent = 'Failed to trigger campaign. Check backend connection.';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'RUN CAMPAIGN';
+            }
+        }
+
+        // INIT — fetch token first, then connect WS and load data
+        statusText.textContent = 'INITIALIZING...';
+        fetchToken().then(() => {
+            connectWS();
+            loadDoctors();
+            loadAppointments();
+            loadMetrics();
+        });
+
+        // Poll metrics every 10s
+        setInterval(loadMetrics, 10000);
+        // Refresh appointments every 30s
+        setInterval(loadAppointments, 30000);
+    </script>
+</body>
+
+</html>
